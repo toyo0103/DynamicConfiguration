@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Microsoft.Extensions.Primitives;
 
 namespace DynamicConfigLab.DynamicConfiguration.Interfaces;
@@ -24,8 +25,5 @@ public interface IDynamicConfigurationStore
     /// </summary>
     void Remove(string key);
 
-    /// <summary>
-    /// Manually triggers change token.
-    /// </summary>
-    void SignalChange();
+    void Reload(ReadOnlyDictionary<string, string> data);
 }

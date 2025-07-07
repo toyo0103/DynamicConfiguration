@@ -6,7 +6,7 @@ namespace DynamicConfigLab.DynamicConfiguration.ConfigurationStores;
 
 internal class InMemoryDynamicStore : IDynamicConfigurationStore
 {
-    private readonly Dictionary<string, string> _data = new();
+    private Dictionary<string, string> _data = new();
     private CancellationTokenSource _cts = new();
 
     public Task<IReadOnlyDictionary<string, string>> LoadAsync(CancellationToken cancellationToken = default)
@@ -28,6 +28,7 @@ internal class InMemoryDynamicStore : IDynamicConfigurationStore
     public void Set(string key, string value)
     {
         _data[key] = value;
+        SignalChange();
     }
 
     /// <summary>
@@ -36,9 +37,16 @@ internal class InMemoryDynamicStore : IDynamicConfigurationStore
     public void Remove(string key)
     {
         _data.Remove(key);
+        SignalChange();
     }
 
-    public void SignalChange()
+    public void Reload(ReadOnlyDictionary<string, string> data)
+    {
+        _data = new (data);
+        SignalChange();
+    }
+    
+    private void SignalChange()
     {
         var previous = _cts;
         _cts = new CancellationTokenSource();

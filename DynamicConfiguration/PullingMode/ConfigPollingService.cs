@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using DynamicConfigLab.DynamicConfiguration.Interfaces;
 using DynamicConfigLab.DynamicConfiguration.PullingMode.Interfaces;
 using DynamicConfigLab.Models;
@@ -30,11 +31,9 @@ public class ConfigPollingService(
             var effectiveConfigs = configurationRepository.GetEffectiveConfigurationAsync(serviceName, serviceScope).GetAwaiter().GetResult();
             logger.LogInformation("Successfully fetched {count} effective configurations for service '{serviceName}'.", effectiveConfigs.Count, serviceName);
 
-            foreach (var config in effectiveConfigs)
-            {
-                configurationStore.Set(config.Key, config.Value.Value);
-            }
-            configurationStore.SignalChange();
+            var data =new ReadOnlyDictionary<string, string>( 
+                effectiveConfigs.ToDictionary(s => s.Key, s => s.Value.Value));
+            configurationStore.Reload(data);
         }
         catch (Exception ex)
         {

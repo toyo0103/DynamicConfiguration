@@ -1,4 +1,4 @@
-namespace DynamicConfigLab;
+namespace DynamicConfigLab.Models;
 
 public class FeatureSettings
 {

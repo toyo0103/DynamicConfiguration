@@ -76,7 +76,7 @@ public class ConfigurationRepository(IAmazonDynamoDB dynamoDb) : IConfigurationR
     {
         var globalConfigs = await QueryScopeAsync(serviceName, "global");
         var scopeConfigs = new List<ServiceConfiguration>();
-        if (scope.ToLower() != "global")
+        if (!string.Equals(scope, "global", StringComparison.OrdinalIgnoreCase))
         {
             scopeConfigs = await QueryScopeAsync(serviceName, scope);
         }
@@ -88,7 +88,8 @@ public class ConfigurationRepository(IAmazonDynamoDB dynamoDb) : IConfigurationR
             effectiveConfig[configName] = new EffectiveConfigValue
             {
                 Value = config.configValue,
-                SourceScope = "global"
+                SourceScope = "global",
+                DeletedAt = config.deletedAt
             };
         }
         foreach (var config in scopeConfigs)
@@ -97,7 +98,8 @@ public class ConfigurationRepository(IAmazonDynamoDB dynamoDb) : IConfigurationR
             effectiveConfig[configName] = new EffectiveConfigValue
             {
                 Value = config.configValue,
-                SourceScope = scope
+                SourceScope = scope,
+                DeletedAt = config.deletedAt
             };
         }
 
@@ -119,21 +121,27 @@ public class ConfigurationRepository(IAmazonDynamoDB dynamoDb) : IConfigurationR
                 {":sk_prefix", new AttributeValue { S = skPrefix }}
             }
         };
-
+        
         var response = await dynamoDb.QueryAsync(request);
-        var results = response.Items.Select(item =>
-        {
-            if (item.ContainsKey("deletedAt")) return null;
-            
-            return new ServiceConfiguration
+        var results = response.Items
+            .Select(item =>
             {
-                pk = item["pk"].S,
-                sk = item["sk"].S,
-                configValue = item["configValue"].S,
-                updatedAt = long.Parse(item["updatedAt"].N)
-            };
-        }).Where(c => c != null).ToList();
-
-        return results!;
+                // Always include TTL/deletedAt metadata
+                long? deletedAt = null;
+                if (item.TryGetValue("deletedAt", out var delAttr) && long.TryParse(delAttr.N, out var dt))
+                {
+                    deletedAt = dt;
+                }
+                return new ServiceConfiguration
+                {
+                    pk = item["pk"].S,
+                    sk = item["sk"].S,
+                    configValue = item["configValue"].S,
+                    updatedAt = long.Parse(item["updatedAt"].N),
+                    deletedAt = deletedAt
+                };
+            })
+            .ToList();
+        return results;
     }
 }

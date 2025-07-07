@@ -1,5 +1,5 @@
-using DynamicConfigLab.DynamicConfiguration.PullingMode.Interfaces;
-using DynamicConfigLab.DynamicConfiguration.PullingMode.Models;
+using DynamicConfigLab.DynamicConfiguration.PollingMode.Interfaces;
+using DynamicConfigLab.DynamicConfiguration.PollingMode.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DynamicConfigLab.Controllers;

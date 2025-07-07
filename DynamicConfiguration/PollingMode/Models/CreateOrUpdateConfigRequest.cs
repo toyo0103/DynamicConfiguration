@@ -1,4 +1,4 @@
-namespace DynamicConfigLab.DynamicConfiguration.PullingMode.Models;
+namespace DynamicConfigLab.DynamicConfiguration.PollingMode.Models;
 
 public class CreateOrUpdateConfigRequest
 {

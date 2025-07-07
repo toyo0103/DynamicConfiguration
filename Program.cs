@@ -1,7 +1,7 @@
 using Amazon.DynamoDBv2;
 using DynamicConfigLab.DynamicConfiguration;
-using DynamicConfigLab.DynamicConfiguration.PullingMode;
-using DynamicConfigLab.DynamicConfiguration.PullingMode.Interfaces;
+using DynamicConfigLab.DynamicConfiguration.PollingMode;
+using DynamicConfigLab.DynamicConfiguration.PollingMode.Interfaces;
 using DynamicConfigLab.Models;
 using Scalar.AspNetCore;
 using Serilog;

@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using DynamicConfigLab.DynamicConfiguration.Interfaces;
-using DynamicConfigLab.DynamicConfiguration.PullingMode.Interfaces;
+using DynamicConfigLab.DynamicConfiguration.PollingMode.Interfaces;
 using DynamicConfigLab.Models;
 using Microsoft.Extensions.Options;
 
-namespace DynamicConfigLab.DynamicConfiguration.PullingMode;
+namespace DynamicConfigLab.DynamicConfiguration.PollingMode;
 
 public class ConfigPollingService(
     ILogger<ConfigPollingService> logger,

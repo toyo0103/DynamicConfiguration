@@ -1,4 +1,4 @@
-namespace DynamicConfigLab.DynamicConfiguration.PullingMode.Models;
+namespace DynamicConfigLab.DynamicConfiguration.PollingMode.Models;
 
 public class ServiceConfiguration
 {
@@ -20,9 +20,4 @@ public class ServiceConfiguration
     /// update timestamp (Unix epoch time)
     /// </summary>
     public long updatedAt { get; set; }
-
-    /// <summary>
-    /// deletion timestamp (Unix epoch time)。
-    /// </summary>
-    public long? deletedAt { get; set; }
 }

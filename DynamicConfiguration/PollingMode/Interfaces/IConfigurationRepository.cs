@@ -1,6 +1,6 @@
-using DynamicConfigLab.DynamicConfiguration.PullingMode.Models;
+using DynamicConfigLab.DynamicConfiguration.PollingMode.Models;
 
-namespace DynamicConfigLab.DynamicConfiguration.PullingMode.Interfaces;
+namespace DynamicConfigLab.DynamicConfiguration.PollingMode.Interfaces;
 
 public interface IConfigurationRepository
 {

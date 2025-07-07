@@ -1,9 +1,9 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
-using DynamicConfigLab.DynamicConfiguration.PullingMode.Interfaces;
-using DynamicConfigLab.DynamicConfiguration.PullingMode.Models;
+using DynamicConfigLab.DynamicConfiguration.PollingMode.Interfaces;
+using DynamicConfigLab.DynamicConfiguration.PollingMode.Models;
 
-namespace DynamicConfigLab.DynamicConfiguration.PullingMode;
+namespace DynamicConfigLab.DynamicConfiguration.PollingMode;
 
 public class ConfigurationRepository(IAmazonDynamoDB dynamoDb) : IConfigurationRepository
 {
@@ -88,8 +88,7 @@ public class ConfigurationRepository(IAmazonDynamoDB dynamoDb) : IConfigurationR
             effectiveConfig[configName] = new EffectiveConfigValue
             {
                 Value = config.configValue,
-                SourceScope = "global",
-                DeletedAt = config.deletedAt
+                SourceScope = "global"
             };
         }
         foreach (var config in scopeConfigs)
@@ -98,8 +97,7 @@ public class ConfigurationRepository(IAmazonDynamoDB dynamoDb) : IConfigurationR
             effectiveConfig[configName] = new EffectiveConfigValue
             {
                 Value = config.configValue,
-                SourceScope = scope,
-                DeletedAt = config.deletedAt
+                SourceScope = scope
             };
         }
 
@@ -124,22 +122,13 @@ public class ConfigurationRepository(IAmazonDynamoDB dynamoDb) : IConfigurationR
         
         var response = await dynamoDb.QueryAsync(request);
         var results = response.Items
-            .Select(item =>
+            .Where(x=> !x.ContainsKey("deletedAt"))
+            .Select(item => new ServiceConfiguration
             {
-                // Always include TTL/deletedAt metadata
-                long? deletedAt = null;
-                if (item.TryGetValue("deletedAt", out var delAttr) && long.TryParse(delAttr.N, out var dt))
-                {
-                    deletedAt = dt;
-                }
-                return new ServiceConfiguration
-                {
-                    pk = item["pk"].S,
-                    sk = item["sk"].S,
-                    configValue = item["configValue"].S,
-                    updatedAt = long.Parse(item["updatedAt"].N),
-                    deletedAt = deletedAt
-                };
+                pk = item["pk"].S,
+                sk = item["sk"].S,
+                configValue = item["configValue"].S,
+                // updatedAt = long.Parse(item["updatedAt"].N),
             })
             .ToList();
         return results;

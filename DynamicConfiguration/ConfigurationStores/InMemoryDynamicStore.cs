@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using DynamicConfigLab.DynamicConfiguration.Interfaces;
 using Microsoft.Extensions.Primitives;
@@ -6,8 +7,8 @@ namespace DynamicConfigLab.DynamicConfiguration.ConfigurationStores;
 
 internal class InMemoryDynamicStore : IDynamicConfigurationStore
 {
-    private Dictionary<string, string> _data = new();
-    private CancellationTokenSource _cts = new();
+    private ConcurrentDictionary<string, string> _data = new();
+    private ConfigurationReloadToken _reloadToken = new();
 
     public Task<IReadOnlyDictionary<string, string>> LoadAsync(CancellationToken cancellationToken = default)
     {
@@ -18,8 +19,7 @@ internal class InMemoryDynamicStore : IDynamicConfigurationStore
 
     public IChangeToken GetReloadToken()
     {
-        // Wrap the CancellationTokenSource's token
-        return new CancellationChangeToken(_cts.Token);
+        return _reloadToken;
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ internal class InMemoryDynamicStore : IDynamicConfigurationStore
     /// </summary>
     public void Remove(string key)
     {
-        _data.Remove(key);
+        _data.Remove(key, out _);
         SignalChange();
     }
 
@@ -48,8 +48,7 @@ internal class InMemoryDynamicStore : IDynamicConfigurationStore
     
     private void SignalChange()
     {
-        var previous = _cts;
-        _cts = new CancellationTokenSource();
-        previous.Cancel();
+        var previousToken = Interlocked.Exchange(ref _reloadToken, new ConfigurationReloadToken());
+        previousToken.OnReload();
     }
 }
